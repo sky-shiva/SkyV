@@ -10,6 +10,8 @@ A fully offline voice dictation app for Windows. Press `Ctrl+Shift` to start rec
 
 ## Features
 
+
+
 - 🎙️ **Push-to-talk dictation** - Press Ctrl+Shift, speak, press again
 - 🔴 **Floating recording overlay** - Shows name, timer, and live waveform
 - 🧠 **100% Offline** - Speech-to-text runs locally via faster-whisper

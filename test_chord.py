@@ -4,6 +4,9 @@ import time
 # Test if Ctrl+Shift is detected
 current_keys = set()
 
+
+
+
 def on_press(key):
     current_keys.add(key)
     print(f"Keys held: {current_keys}")

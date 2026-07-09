@@ -5,3 +5,7 @@ pyyaml
 requests
 numpy
 pyperclip
+
+
+
+

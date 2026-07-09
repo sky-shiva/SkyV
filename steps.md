@@ -20,6 +20,7 @@ A fully offline voice dictation app for Windows. Press `Ctrl+Shift` to start rec
 
 ## Setup
 
+
 ### 1. Clone or download the project
 ```bash
 git clone https://github.com/anesriad/VoiceBud-Local-Riad.git

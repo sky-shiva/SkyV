@@ -4,6 +4,7 @@ import time
 import math
 
 
+
 class Overlay:
     """Floating pill-shaped recording indicator for Windows."""
     

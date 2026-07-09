@@ -2,6 +2,8 @@
 from pynput import keyboard
 import time
 
+
+
 KEY_MAP = {
     "alt": keyboard.Key.alt,
     "alt_l": keyboard.Key.alt_l,

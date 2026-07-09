@@ -6,6 +6,7 @@ import numpy as np
 import sounddevice as sd
 
 
+
 class Recorder:
     def __init__(self, sample_rate=16000, channels=1, preroll_ms=500, blocksize=320):
         self.sample_rate = sample_rate

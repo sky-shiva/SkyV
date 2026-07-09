@@ -4,6 +4,8 @@ import pyperclip
 from pynput.keyboard import Controller, Key
 
 
+
+
 def inject(text, cfg):
     if not text:
         return

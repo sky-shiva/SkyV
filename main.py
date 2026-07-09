@@ -14,6 +14,7 @@ from overlay import Overlay
 APP_NAME = "VoiceBud"
 
 
+
 def main():
     with open("config.yaml") as f:
         cfg = yaml.safe_load(f)

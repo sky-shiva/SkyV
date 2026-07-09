@@ -6,6 +6,8 @@ def on_press(key):
     except AttributeError:
         print(f"Special key: {key}")
 
+
+
 def on_release(key):
     if key == keyboard.Key.esc:
         return False
