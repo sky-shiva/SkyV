@@ -24,33 +24,40 @@ class Cleaner:
             return False
 
     def clean(self, text):
-        # LATENCY RULE: short utterances skip the LLM entirely.
         if not self.enabled or not text or len(text.split()) < self.min_words:
             return text
         try:
-            # Small models treat bare text as something to answer, not clean.
-            # Wrap it with an explicit instruction + one example to force edit-only behavior.
             prompt = (
-                "Copy the following text exactly, but: delete filler words "
-                "(um, uh, ah, like, you know), fix punctuation and capitalization, "
-                "and fix small grammar slips (wrong tense, repeated words). "
-                "Keep the speaker's own wording and meaning — do not rephrase, "
-                "summarize, or reply to it. Do not add anything.\n\n"
-                f"{text}"
+                "Clean this transcript: remove filler words (um, uh, ah, like, you know), "
+                "fix punctuation and capitalization, fix small grammar errors. "
+                "Return ONLY the cleaned text, nothing else. No introductions, no explanations.\n\n"
+                f"Transcript: {text}\n\nCleaned:"
             )
             r = requests.post(
                 f"{self.base_url}/api/generate",
                 json={
                     "model": self.model,
-                    "system": self.cfg.get("system_prompt", ""),
+                    "system": "You are a transcript cleaner. Output ONLY the cleaned text. Never add headers, introductions, or explanations. Just the cleaned text.",
                     "prompt": prompt,
                     "stream": False,
-                    "think": False,  # disable reasoning mode (qwen3 etc.) — cleanup must be instant
-                    "options": {"temperature": float(self.cfg.get("temperature", 0.1))},
+                    "options": {"temperature": 0.0, "stop": ["\n\n", "Here is", "Cleaned text:"]},
                 },
                 timeout=30,
             )
             cleaned = r.json().get("response", "").strip()
+            
+            # Remove common prefixes that models add
+            prefixes_to_remove = [
+                "Here is the cleaned text:",
+                "Here's the cleaned text:",
+                "Cleaned text:",
+                "Cleaned transcript:",
+                "Here you go:",
+            ]
+            for prefix in prefixes_to_remove:
+                if cleaned.lower().startswith(prefix.lower()):
+                    cleaned = cleaned[len(prefix):].strip()
+            
             return cleaned or text
         except requests.RequestException as e:
             print(f"Cleanup failed ({e}); using raw transcript.")

@@ -1,13 +1,13 @@
 stt:
   engine: faster-whisper      # faster-whisper | mlx-whisper (optional faster path)
-  model: tiny.en              # tiny.en | base | small | medium | large-v3
+  model: medium.en              # tiny.en | base | small | medium | large-v3
   language: null              # null = auto-detect, or e.g. "en"
   compute_type: int8          # int8 is fastest on CPU for CTranslate2
 
 llm:
-  enabled: true
+  enabled: false
   # to change the LLM: edit llm.model below, then restart
-  model: qwen3:4b-instruct
+  model: llama3:latest
   base_url: http://localhost:11434
   temperature: 0.1
   min_words_for_cleanup: 10   # utterances under this word count skip Ollama entirely

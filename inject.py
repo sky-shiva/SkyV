@@ -1,57 +1,31 @@
-"""Text injection at the cursor: clipboard + synthesized Cmd+V (Quartz CGEvent),
-with a per-character Unicode keystroke fallback. Saves/restores the clipboard."""
+"""Text injection at the cursor: clipboard + Ctrl+V (Windows)."""
 import time
-
-import Quartz
-from AppKit import NSPasteboard, NSPasteboardTypeString
-
-KEY_V = 9  # macOS virtual keycode for 'v'
-
-
-def _set_clipboard(text):
-    pb = NSPasteboard.generalPasteboard()
-    pb.clearContents()
-    pb.setString_forType_(text, NSPasteboardTypeString)
-
-
-def _get_clipboard():
-    pb = NSPasteboard.generalPasteboard()
-    return pb.stringForType_(NSPasteboardTypeString)
-
-
-def _press_cmd_v():
-    src = Quartz.CGEventSourceCreate(Quartz.kCGEventSourceStateHIDSystemState)
-    down = Quartz.CGEventCreateKeyboardEvent(src, KEY_V, True)
-    up = Quartz.CGEventCreateKeyboardEvent(src, KEY_V, False)
-    Quartz.CGEventSetFlags(down, Quartz.kCGEventFlagMaskCommand)
-    Quartz.CGEventSetFlags(up, Quartz.kCGEventFlagMaskCommand)
-    Quartz.CGEventPost(Quartz.kCGHIDEventTap, down)
-    Quartz.CGEventPost(Quartz.kCGHIDEventTap, up)
-
-
-def _type_unicode(text):
-    """Fallback: per-character CGEvent Unicode keystrokes (no clipboard involved)."""
-    src = Quartz.CGEventSourceCreate(Quartz.kCGEventSourceStateHIDSystemState)
-    for ch in text:
-        down = Quartz.CGEventCreateKeyboardEvent(src, 0, True)
-        Quartz.CGEventKeyboardSetUnicodeString(down, len(ch), ch)
-        Quartz.CGEventPost(Quartz.kCGHIDEventTap, down)
-        up = Quartz.CGEventCreateKeyboardEvent(src, 0, False)
-        Quartz.CGEventKeyboardSetUnicodeString(up, len(ch), ch)
-        Quartz.CGEventPost(Quartz.kCGHIDEventTap, up)
-        time.sleep(0.002)
+import pyperclip
+from pynput.keyboard import Controller, Key
 
 
 def inject(text, cfg):
     if not text:
         return
-    if cfg.get("method", "paste") == "type":
-        _type_unicode(text)
-        return
-    old = _get_clipboard() if cfg.get("restore_clipboard", True) else None
-    _set_clipboard(text)
-    time.sleep(0.05)  # let the pasteboard settle
-    _press_cmd_v()
-    if old is not None:
-        time.sleep(0.25)  # let the paste land before restoring
-        _set_clipboard(old)
+    
+    # Save old clipboard
+    try:
+        old_clipboard = pyperclip.paste()
+    except:
+        old_clipboard = None
+    
+    # Copy text to clipboard
+    pyperclip.copy(text)
+    time.sleep(0.05)
+    
+    # Press Ctrl+V to paste
+    keyboard = Controller()
+    keyboard.press(Key.ctrl)
+    keyboard.press('v')
+    keyboard.release('v')
+    keyboard.release(Key.ctrl)
+    
+    # Restore old clipboard if needed
+    if old_clipboard is not None and cfg.get("restore_clipboard", True):
+        time.sleep(0.25)
+        pyperclip.copy(old_clipboard)
